@@ -35,7 +35,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         int id = getIntent().getIntExtra(ID_BOOK, 0);
 
-        book = SingletonBookManager.getInstance().getBook(id);
+        book = SingletonBookManager.getInstance(getApplicationContext()).getBook(id);
         fabSave = findViewById(R.id.fabSave);
         etTitle = findViewById(R.id.et_title);
         etSeries = findViewById(R.id.et_series);
@@ -62,7 +62,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     book.setAutor(etAuthor.getText().toString());
                     book.setYear(Integer.parseInt(etYear.getText().toString()));
 
-                    SingletonBookManager.getInstance().editBook(book);
+                    SingletonBookManager.getInstance(getApplicationContext()).editBookDb(book);
 
                     //EX 10.2
                     Intent intent = new Intent();
@@ -73,13 +73,14 @@ public class BookDetailsActivity extends AppCompatActivity {
                     //Add Book
                     //IF book im saving is valid and fields are not empty function and call it here
                     book = new Book(
+                            0,
                             R.drawable.logoipl,
                             Integer.parseInt(etYear.getText().toString()),
                             etTitle.getText().toString(),
                             etSeries.getText().toString(),
                             etAuthor.getText().toString()
                     );
-                    SingletonBookManager.getInstance().addBook(book);
+                    SingletonBookManager.getInstance(getApplicationContext()).addBookDb(book);
                     //EX 10.2
                     Intent intent = new Intent();
                     intent.putExtra(MenuMainActivity.OP_CODE, MenuMainActivity.ADD);
@@ -123,7 +124,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SingletonBookManager.getInstance().removeBook(book.getId());
+                        SingletonBookManager.getInstance(getApplicationContext()).removeBookDb(book.getId());
                         Intent intent = new Intent();
                         intent.putExtra(MenuMainActivity.OP_CODE, MenuMainActivity.DELETE);
                         setResult(RESULT_OK, intent);

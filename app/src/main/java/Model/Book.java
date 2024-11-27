@@ -5,14 +5,17 @@ public class Book {
     private String title, serie, autor;
     private static int autoIncrementId = 1;
 
-    public Book(int cover, int year, String title, String serie, String autor) {
-//        this.id = id;
-        this.id = autoIncrementId++;
+    public Book(int id,int cover, int year, String title, String serie, String autor) {
+        this.id = id;
         this.cover = cover;
         this.year = year;
         this.title = title;
         this.serie = serie;
         this.autor = autor;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getId() {

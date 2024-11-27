@@ -50,7 +50,7 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
 
 
         lvBooks = view.findViewById(R.id.lv_books);
-        bookList = SingletonBookManager.getInstance().getBooks();
+        bookList = SingletonBookManager.getInstance(getContext()).getBooksDb();
         lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
         lvBooks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -92,7 +92,7 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
             public boolean onQueryTextChange(String newText) {
                 ArrayList<Book> tempBooks = new ArrayList<>();
 
-                for (Book b : SingletonBookManager.getInstance().getBooks()) {
+                for (Book b : SingletonBookManager.getInstance(getContext()).getBooksDb()) {
                     if (b.getTitle().toLowerCase().contains(newText.toLowerCase())) {
                         tempBooks.add(b);
                     }
@@ -109,7 +109,7 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == MenuMainActivity.ADD || requestCode == MenuMainActivity.EDIT) {
-                bookList = SingletonBookManager.getInstance().getBooks();
+                bookList = SingletonBookManager.getInstance(getContext()).getBooksDb();
                 lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
                 switch (requestCode) {
                     case MenuMainActivity.ADD:
@@ -132,7 +132,7 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onRefresh() {
-        bookList = SingletonBookManager.getInstance().getBooks();
+        bookList = SingletonBookManager.getInstance(getContext()).getBooksDb();
         lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
         swipeRefreshLayout.setRefreshing(false);
     }
