@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior ="single">
+        <item
+            android:id="@+id/listBook"
+            android:title="@string/livros_lista"
+            android:icon="@drawable/ic_menu_static"/>
+        <item
+            android:id="@+id/gridBook"
+            android:title="@string/livros_grelha"
+            android:icon="@drawable/ic_menu_dynamic"/>
+
+    </group>
+    <item
+        android:id="@+id/navCommunicate"
+        android:title="@string/communicate">
+        <menu>
+            <item
+                android:id="@+id/navEmail"
+                android:title="@string/email"
+                android:icon="@drawable/ic_menu_email"/>
+        </menu>
+    </item>
+</menu>
