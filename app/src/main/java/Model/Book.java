@@ -1,11 +1,11 @@
 package Model;
 
 public class Book {
-    private int id, cover, year;
-    private String title, serie, autor;
+    private int id, year;
+    private String title, serie, autor , cover;
     private static int autoIncrementId = 1;
 
-    public Book(int id,int cover, int year, String title, String serie, String autor) {
+    public Book(int id, String cover, int year, String title, String serie, String autor) {
         this.id = id;
         this.cover = cover;
         this.year = year;
@@ -22,11 +22,11 @@ public class Book {
         return id;
     }
 
-    public int getCover() {
+    public String getCover() {
         return cover;
     }
 
-    public void setCover(int cover) {
+    public void setCover(String cover) {
         this.cover = cover;
     }
 

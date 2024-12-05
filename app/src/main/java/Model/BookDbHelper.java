@@ -33,12 +33,12 @@ public class BookDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createBookTable = "CREATE TABLE " + TABLE_NAME +
-                "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                "(" + ID + " INTEGER, " +
                 TITLE + " TEXT NOT NULL, " +
-                SERIES + " TEXT NOT NULL, "+
-                AUTHOR + " TEXT NOT NULL, "+
-                YEAR + " INTEGER NOT NULL, "+
-                COVER + " INTEGER"+
+                SERIES + " TEXT NOT NULL, " +
+                AUTHOR + " TEXT NOT NULL, " +
+                YEAR + " INTEGER NOT NULL, " +
+                COVER + " TEXT" +
                 ");";
 
         db.execSQL(createBookTable);
@@ -46,11 +46,11 @@ public class BookDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS "+ TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         this.onCreate(db);
     }
 
-    public Book addBookDb(Book book){
+    public void addBookDb(Book book) {
         ContentValues values = new ContentValues();
         values.put(TITLE, book.getTitle());
         values.put(SERIES, book.getSerie());
@@ -58,15 +58,10 @@ public class BookDbHelper extends SQLiteOpenHelper {
         values.put(YEAR, book.getYear());
         values.put(COVER, book.getCover());
 
-        long id = this.db.insert(TABLE_NAME,null, values);
-        if(id > -1){
-            book.setId((int)id);
-            return book;
-        }
-        return null;
+        this.db.insert(TABLE_NAME, null, values);
     }
 
-    public boolean editBookDb(Book book){
+    public boolean editBookDb(Book book) {
         ContentValues values = new ContentValues();
         values.put(TITLE, book.getTitle());
         values.put(SERIES, book.getSerie());
@@ -74,30 +69,35 @@ public class BookDbHelper extends SQLiteOpenHelper {
         values.put(YEAR, book.getYear());
         values.put(COVER, book.getCover());
 
-        return this.db.update(TABLE_NAME, values, ID + "= ?" , new String[]{""+book.getId()}) > 0;
+        return this.db.update(TABLE_NAME, values, ID + "= ?", new String[]{"" + book.getId()}) > 0;
     }
 
-    public boolean removeBookDb (int id){
-        return this.db.delete(TABLE_NAME,ID + "= ?" , new String[]{""+id}) == 1;
+    public boolean removeBookDb(int id) {
+        return this.db.delete(TABLE_NAME, ID + "= ?", new String[]{"" + id}) == 1;
     }
 
-    public ArrayList<Book> getAllBooksDb(){
+    public ArrayList<Book> getAllBooksDb() {
         ArrayList<Book> books = new ArrayList<>();
 
-        Cursor cursor = this.db.query(TABLE_NAME, new String[]{ID,TITLE,SERIES,AUTHOR,YEAR,COVER},
-                null,null,null,null,null);
+        Cursor cursor = this.db.query(TABLE_NAME, new String[]{ID, TITLE, SERIES, AUTHOR, YEAR, COVER},
+                null, null, null, null, null);
 
-        if(cursor.moveToFirst()){
-            do{
+        if (cursor.moveToFirst()) {
+            do {
                 Book auxBook = new Book(cursor.getInt(0),
-                        cursor.getInt(5),
+                        cursor.getString(5),
                         cursor.getInt(4),
                         cursor.getString(1),
                         cursor.getString(2),
                         cursor.getString(3));
                 books.add(auxBook);
-            } while(cursor.moveToNext());
+            } while (cursor.moveToNext());
         }
         return books;
     }
+
+    public void removeAllBooksDb() {
+        this.db.delete(TABLE_NAME, null, null);
+    }
+
 }

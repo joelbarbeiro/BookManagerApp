@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import Model.Book;
@@ -25,6 +27,8 @@ public class BookDetailsActivity extends AppCompatActivity {
 
     private EditText etTitle, etSeries, etAuthor, etYear;
     private ImageView ivCover;
+
+    public static final String DEFAULT_IMG = "http://amsi.dei.estg.ipleiria.pt/img/ipl_semfundo.png";
 
     private FloatingActionButton fabSave;
 
@@ -74,7 +78,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                     //IF book im saving is valid and fields are not empty function and call it here
                     book = new Book(
                             0,
-                            R.drawable.logoipl,
+                            DEFAULT_IMG,
                             Integer.parseInt(etYear.getText().toString()),
                             etTitle.getText().toString(),
                             etSeries.getText().toString(),
@@ -97,7 +101,11 @@ public class BookDetailsActivity extends AppCompatActivity {
         etSeries.setText(book.getSerie());
         etAuthor.setText(book.getAutor());
         etYear.setText("" + book.getYear());
-        ivCover.setImageResource(book.getCover());
+        Glide.with(getApplicationContext()).
+                load(book.getCover()).
+                placeholder(R.drawable.logoipl).
+                diskCacheStrategy(DiskCacheStrategy.ALL).
+                into(ivCover);
     }
 
     @Override

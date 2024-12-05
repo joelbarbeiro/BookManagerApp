@@ -8,7 +8,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.sql.SQLOutput;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
 import java.util.ArrayList;
 
 import Model.Book;
@@ -52,11 +54,10 @@ public class ListBookAdapter extends BaseAdapter {
         }
 
         ViewHolderList viewHolderList = (ViewHolderList) convertView.getTag();
-        if(viewHolderList == null){
+        if (viewHolderList == null) {
             viewHolderList = new ViewHolderList(convertView);
             convertView.setTag(viewHolderList);
         }
-
 
         viewHolderList.update(arrayList.get(position));
 
@@ -80,7 +81,11 @@ public class ListBookAdapter extends BaseAdapter {
             tvSeries.setText(book.getSerie());
             tvYear.setText("" + book.getYear());
             tvAuthor.setText(book.getAutor());
-            cover.setImageResource(book.getCover());
+            Glide.with(context).
+                    load(book.getCover()).
+                    placeholder(R.drawable.logoipl).
+                    diskCacheStrategy(DiskCacheStrategy.ALL).
+                    into(cover);
         }
     }
 }
