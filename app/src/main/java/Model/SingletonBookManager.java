@@ -18,6 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pt.ipleiria.estg.dei.books.BookDetailsActivity;
+import pt.ipleiria.estg.dei.books.Listeners.BookListener;
+import pt.ipleiria.estg.dei.books.Listeners.BooksListener;
+import pt.ipleiria.estg.dei.books.Listeners.LoginListener;
+import pt.ipleiria.estg.dei.books.MenuMainActivity;
 import pt.ipleiria.estg.dei.books.R;
 import pt.ipleiria.estg.dei.books.utils.BookJsonParser;
 
@@ -26,18 +30,20 @@ public class SingletonBookManager {
     private ArrayList<Book> books;
     private static SingletonBookManager instance = null;
 
-    private static final String urlAPIBook = "http://amsi.dei.estg.ipleiria.pt/api/livros";
+    private static final String urlAPIBook = "http://172.22.21.41/api/livros";
 
-    private static final String mUrlAPILogin = "http://amsi.dei.estg.ipleiria.pt/api/auth/login";
+    private static final String mUrlAPILogin = "http://172.22.21.41/api/auth/login";
 
     private BookDbHelper bookDbHelper = null;
 
     private static RequestQueue volleyQueue = null;
 
-    public SingletonBookManager(Context context) {
-        books = new ArrayList<Book>();
-        bookDbHelper = new BookDbHelper(context);
-    }
+    private BooksListener booksListener;
+
+    private BookListener bookListener;
+
+    private LoginListener loginListener;
+
 
     public static synchronized SingletonBookManager getInstance(Context context) {
         if (instance == null) {
@@ -45,6 +51,24 @@ public class SingletonBookManager {
             volleyQueue = Volley.newRequestQueue(context);
         }
         return instance;
+    }
+
+    public SingletonBookManager(Context context) {
+        books = new ArrayList<>();
+        bookDbHelper = new BookDbHelper(context);
+    }
+
+    //REGISTER LISTENERS
+    public void setBooksListener(BooksListener booksListener) {
+        this.booksListener = booksListener;
+    }
+
+    public void setBookListener(BookListener bookListener) {
+        this.bookListener = bookListener;
+    }
+
+    public void setLoginListener(LoginListener loginListener) {
+        this.loginListener = loginListener;
     }
 
     public ArrayList<Book> getBooksBD() {
@@ -84,11 +108,14 @@ public class SingletonBookManager {
     }
 
     //region = API METHODS #
+
     public void getAllBooksApi(final Context context) {
         if (!BookJsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
 
-            //TODO LOAD BOOKS FROM DATABASE
+            if(booksListener != null){
+                booksListener.onRefreshBookList(bookDbHelper.getAllBooksDb());
+            }
         } else {
             JsonArrayRequest request = new JsonArrayRequest(
                     Request.Method.GET,
@@ -100,6 +127,10 @@ public class SingletonBookManager {
                             System.out.println("---> GETAPI: " + response);
                             books = BookJsonParser.parserJsonBooks(response);
                             addBooksDb(books);
+
+                            if(booksListener != null){
+                                booksListener.onRefreshBookList(books);
+                            }
                         }
                     },
                     new Response.ErrorListener() {
@@ -121,7 +152,9 @@ public class SingletonBookManager {
                 public void onResponse(String response) {
                     addBookDb(BookJsonParser.parserJsonBook(response));
 
-                    //TODO IMPLEMENT LISTENERS
+                    if(bookListener != null){
+                        bookListener.onRefreshDetails(MenuMainActivity.ADD);
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -154,6 +187,10 @@ public class SingletonBookManager {
                 @Override
                 public void onResponse(String response) {
                     editBookDb(book);
+
+                    if(bookListener != null){
+                        bookListener.onRefreshDetails(MenuMainActivity.EDIT);
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -177,7 +214,7 @@ public class SingletonBookManager {
         }
     }
 
-    public void removeBookApi(final Book book, final Context context){
+    public void removeBookApi(final Book book, final Context context) {
         if (!BookJsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
         } else {
@@ -186,7 +223,9 @@ public class SingletonBookManager {
                 public void onResponse(String response) {
                     removeBookDb(book.getId());
 
-                    //TODO IMPLEMENT LISTENERS
+                    if(bookListener != null){
+                        bookListener.onRefreshDetails(MenuMainActivity.DELETE);
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -197,5 +236,12 @@ public class SingletonBookManager {
             volleyQueue.add(request);
         }
     }
+
+    public void loginAPI(final String email, final String password, final String token, Context context){
+        if(loginListener != null){
+            loginListener.onValidateLogin(token,email,context);
+        }
+    }
+
     //endregion
 }

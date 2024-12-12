@@ -73,6 +73,35 @@ public class BookJsonParser {
 
     // TODO : parserJsonLogin
 
+    public static Book parserJsonLogin(String response) {
+        Book auxBook = null;
+
+        try {
+            JSONObject Book = new JSONObject(response);
+            int idBook = Book.getInt("id");
+            String titleBook = Book.getString("titulo");
+            String seriesBook = Book.getString("serie");
+            String authorBook = Book.getString("autor");
+            int yearBook = Book.getInt("ano");
+            String coverBook = Book.getString("capa");
+
+            auxBook = new Book(
+                    idBook,
+                    coverBook,
+                    yearBook,
+                    titleBook,
+                    seriesBook,
+                    authorBook
+            );
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return auxBook;
+    }
+
+
     public static boolean isConnectionInternet(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();

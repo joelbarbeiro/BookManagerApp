@@ -26,15 +26,14 @@ import java.util.ArrayList;
 import Model.Book;
 import Model.SingletonBookManager;
 import pt.ipleiria.estg.dei.books.Adapters.ListBookAdapter;
+import pt.ipleiria.estg.dei.books.Listeners.BooksListener;
 
-public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, BooksListener {
 
     private ListView lvBooks;
-    private ArrayList<Book> bookList;
     private FloatingActionButton fabList;
     private SearchView searchView;
     private SwipeRefreshLayout swipeRefreshLayout;
-
 
     public ListBookFragment() {
         // Required empty public constructor
@@ -48,10 +47,8 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
         setHasOptionsMenu(true);
         fabList = view.findViewById(R.id.fabList);
 
-
         lvBooks = view.findViewById(R.id.lv_books);
-        bookList = SingletonBookManager.getInstance(getContext()).getBooksBD();
-        lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
+
         lvBooks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -73,6 +70,9 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
+
+        SingletonBookManager.getInstance(getContext()).setBooksListener(this);
+        SingletonBookManager.getInstance(getContext()).getAllBooksApi(getContext());
 
         return view;
     }
@@ -109,8 +109,9 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == MenuMainActivity.ADD || requestCode == MenuMainActivity.EDIT) {
-                bookList = SingletonBookManager.getInstance(getContext()).getBooksBD();
-                lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
+
+                SingletonBookManager.getInstance(getContext()).getAllBooksApi(getContext());
+
                 switch (requestCode) {
                     case MenuMainActivity.ADD:
                         Snackbar.make(getView(), "Book Added Successfully", Snackbar.LENGTH_SHORT).show();
@@ -132,8 +133,15 @@ public class ListBookFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onRefresh() {
-        bookList = SingletonBookManager.getInstance(getContext()).getBooksBD();
-        lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
+//        bookList = SingletonBookManager.getInstance(getContext()).getBooksBD();
+        SingletonBookManager.getInstance(getContext()).getAllBooksApi(getContext());
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onRefreshBookList(ArrayList<Book> bookList) {
+        if (bookList != null) {
+            lvBooks.setAdapter(new ListBookAdapter(getContext(), bookList));
+        }
     }
 }

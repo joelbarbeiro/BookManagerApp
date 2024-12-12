@@ -29,7 +29,6 @@ public class BookDbHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
         this.db = getWritableDatabase();
     }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createBookTable = "CREATE TABLE " + TABLE_NAME +
@@ -40,7 +39,6 @@ public class BookDbHelper extends SQLiteOpenHelper {
                 YEAR + " INTEGER NOT NULL, " +
                 COVER + " TEXT" +
                 ");";
-
         db.execSQL(createBookTable);
     }
 
@@ -74,6 +72,26 @@ public class BookDbHelper extends SQLiteOpenHelper {
 
     public boolean removeBookDb(int id) {
         return this.db.delete(TABLE_NAME, ID + "= ?", new String[]{"" + id}) == 1;
+    }
+
+    public ArrayList<Book> getAllBooks(){
+        ArrayList<Book> Books = new ArrayList<>();
+
+        Cursor cursor = this.db.query(TABLE_NAME, new String[]{ID, TITLE, SERIES, AUTHOR, YEAR, COVER}, null, null, null, null, null);
+
+        if(cursor.moveToFirst()){
+            do{
+                Book $auxBook = new Book(
+                        cursor.getInt(0),
+                        cursor.getString(5),
+                        cursor.getInt(4),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3));
+                Books.add($auxBook);
+            }while(cursor.moveToNext());
+        }
+        return Books;
     }
 
     public ArrayList<Book> getAllBooksDb() {

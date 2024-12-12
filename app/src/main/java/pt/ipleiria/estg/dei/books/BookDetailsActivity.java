@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -19,8 +20,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import Model.Book;
 import Model.SingletonBookManager;
+import pt.ipleiria.estg.dei.books.Listeners.BookListener;
+import pt.ipleiria.estg.dei.books.utils.BookJsonParser;
 
-public class BookDetailsActivity extends AppCompatActivity {
+public class BookDetailsActivity extends AppCompatActivity implements BookListener {
 
     public static final String ID_BOOK = "ID_BOOK";
     private Book book;
@@ -40,6 +43,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         int id = getIntent().getIntExtra(ID_BOOK, 0);
 
         book = SingletonBookManager.getInstance(getApplicationContext()).getBook(id);
+
         fabSave = findViewById(R.id.fabSave);
         etTitle = findViewById(R.id.et_title);
         etSeries = findViewById(R.id.et_series);
@@ -66,16 +70,10 @@ public class BookDetailsActivity extends AppCompatActivity {
                     book.setAutor(etAuthor.getText().toString());
                     book.setYear(Integer.parseInt(etYear.getText().toString()));
 
-                    SingletonBookManager.getInstance(getApplicationContext()).editBookDb(book);
+                    SingletonBookManager.getInstance(getApplicationContext()).editBookApi(book, getApplicationContext());
 
-                    //EX 10.2
-                    Intent intent = new Intent();
-                    intent.putExtra(MenuMainActivity.OP_CODE, MenuMainActivity.EDIT);
-                    setResult(RESULT_OK, intent);
-                    finish();
                 } else {
-                    //Add Book
-                    //IF book im saving is valid and fields are not empty function and call it here
+
                     book = new Book(
                             0,
                             DEFAULT_IMG,
@@ -84,15 +82,11 @@ public class BookDetailsActivity extends AppCompatActivity {
                             etSeries.getText().toString(),
                             etAuthor.getText().toString()
                     );
-                    SingletonBookManager.getInstance(getApplicationContext()).addBookDb(book);
-                    //EX 10.2
-                    Intent intent = new Intent();
-                    intent.putExtra(MenuMainActivity.OP_CODE, MenuMainActivity.ADD);
-                    setResult(RESULT_OK, intent);
-                    finish();
+                    SingletonBookManager.getInstance(getApplicationContext()).addBookApi(book, getApplicationContext());
                 }
             }
         });
+        SingletonBookManager.getInstance(getApplicationContext()).setBookListener(this);
     }
 
     private void loadBook() {
@@ -120,7 +114,12 @@ public class BookDetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.itemRemove) {
-            dialogRemove();
+            if (!BookJsonParser.isConnectionInternet(getApplicationContext())) {
+                Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
+            } else {
+                dialogRemove();
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -132,11 +131,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SingletonBookManager.getInstance(getApplicationContext()).removeBookDb(book.getId());
-                        Intent intent = new Intent();
-                        intent.putExtra(MenuMainActivity.OP_CODE, MenuMainActivity.DELETE);
-                        setResult(RESULT_OK, intent);
-                        finish();
+                        SingletonBookManager.getInstance(getApplicationContext()).removeBookApi(book, getApplicationContext());
                     }
                 })
                 .setNegativeButton(R.string.string_no, new DialogInterface.OnClickListener() {
@@ -149,4 +144,11 @@ public class BookDetailsActivity extends AppCompatActivity {
                 .show();
     }
 
+    @Override
+    public void onRefreshDetails(int op) {
+        Intent intent = new Intent();
+        intent.putExtra(MenuMainActivity.OP_CODE, op);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
 }
